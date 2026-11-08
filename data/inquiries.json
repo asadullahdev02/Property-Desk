@@ -1,0 +1,123 @@
+[
+    {
+        "id": "INQ-20261109-E76A",
+        "name": "00",
+        "phone": "+92 3248674586",
+        "address": "00",
+        "property_id": "General Inquiry",
+        "property_title": "General Agency Contact",
+        "message": "hi",
+        "status": "New",
+        "created_at": "2026-11-09 00:14:39"
+    },
+    {
+        "id": "INQ-20261109-180E",
+        "name": "asad",
+        "phone": "+92 3248674586",
+        "address": "asad",
+        "property_id": "General Inquiry",
+        "property_title": "General Agency Contact",
+        "message": "i &#039;m intersted for buying property",
+        "status": "New",
+        "created_at": "2026-11-09 00:09:16"
+    },
+    {
+        "id": "INQ-20261108-099B",
+        "name": "asad",
+        "phone": "+92 3248674586",
+        "address": "lhr",
+        "property_id": "General Inquiry",
+        "property_title": "General Agency Contact",
+        "message": "hello",
+        "status": "New",
+        "created_at": "2026-11-08 23:40:09"
+    },
+    {
+        "id": "INQ-20261108-DDD4",
+        "name": "Haris Rauf",
+        "phone": "+92 3024625625",
+        "address": "Chaklala Scheme 3, Rawalpindi",
+        "property_id": "APD-112",
+        "property_title": "Commercial Retail Space in Mall",
+        "message": "Assalam-o-Alaikum, I want to inquire about the commercial retail space.",
+        "status": "New",
+        "created_at": "2026-11-08 23:26:58"
+    },
+    {
+        "id": "INQ-20261108-D514",
+        "name": "Babar Azam",
+        "phone": "+92 3024625625",
+        "address": "Model Town Block B, Lahore",
+        "property_id": "APD-101",
+        "property_title": "1 Kanal Ultra-Luxury Designer Villa",
+        "message": "Assalam-o-Alaikum, I want to discuss buying a 1 Kanal Villa in DHA Lahore.",
+        "status": "New",
+        "created_at": "2026-11-08 23:26:18"
+    },
+    {
+        "id": "INQ-20261108-5382",
+        "name": "Babar Azam",
+        "phone": "+92 3024625625",
+        "address": "Model Town Block B, Lahore",
+        "property_id": "APD-101",
+        "property_title": "1 Kanal Ultra-Luxury Designer Villa",
+        "message": "Assalam-o-Alaikum, I want to discuss buying a 1 Kanal Villa in DHA Lahore.",
+        "status": "New",
+        "created_at": "2026-11-08 23:25:11"
+    },
+    {
+        "id": "INQ-20261108-A2BC",
+        "name": "Ali Raza",
+        "phone": "+92 3024625625",
+        "address": "Bahria Town, Phase 8, Islamabad",
+        "property_id": "General Inquiry",
+        "property_title": "General Agency Contact",
+        "message": "Assalam-o-Alaikum, I am calling to inquire about 1 Kanal Plots in DHA Islamabad.",
+        "status": "New",
+        "created_at": "2026-11-08 22:32:17"
+    },
+    {
+        "id": "INQ-20261107-42BE",
+        "name": "Chaudhry Kamran",
+        "phone": "+92 3007654321",
+        "address": "DHA Phase 6, Sector J, Lahore",
+        "property_id": "APD-101",
+        "property_title": "1 Kanal Ultra-Luxury Designer Villa",
+        "message": "Assalam-o-Alaikum, I want to book a physical visit to the 1 Kanal Villa this Sunday afternoon.",
+        "status": "New",
+        "created_at": "2026-11-07 01:05:19"
+    },
+    {
+        "id": "INQ-2026-001",
+        "name": "Tariq Mehmood",
+        "phone": "+92 300 8472910",
+        "address": "Model Town Block C, Lahore",
+        "property_id": "APD-101",
+        "property_title": "1 Kanal Ultra-Luxury Designer Villa",
+        "message": "Assalam-o-Alaikum, I am interested in visiting this 1 Kanal Villa in DHA Phase 6 this Saturday. Please let me know available visiting times and if the price is negotiable.",
+        "status": "New",
+        "created_at": "2026-11-06 16:30:15"
+    },
+    {
+        "id": "INQ-2026-002",
+        "name": "Dr. Farhan Qureshi",
+        "phone": "+92 321 4455889",
+        "address": "F-8/3, Islamabad",
+        "property_id": "APD-104",
+        "property_title": "1 Kanal Prime Residential Plot",
+        "message": "Hello Abdullah Property Dealer team, please share the file status and allotment letter details for this plot in DHA Phase 2 Rawalpindi.",
+        "status": "Contacted",
+        "created_at": "2026-11-05 11:20:45"
+    },
+    {
+        "id": "INQ-2026-003",
+        "name": "Zubair Hashmi",
+        "phone": "+92 333 5123987",
+        "address": "DHA Phase 5, Karachi",
+        "property_id": "APD-110",
+        "property_title": "Fully Furnished 2-Bed Luxury Suite",
+        "message": "Is this apartment available for a 1-year corporate lease starting next month? Please share maintenance charges and security deposit requirements.",
+        "status": "Closed",
+        "created_at": "2026-11-04 18:40:22"
+    }
+]
