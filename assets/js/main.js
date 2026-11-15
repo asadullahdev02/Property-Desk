@@ -1,6 +1,6 @@
 /**
  * Abdullah Property Dealer - Main Client Script
- * Dynamic Filtering, Real Estate Interactions, Form Submissions
+ * Dynamic Filtering, Search & Sorting, Favorites System, PKR Mortgage Calculator, Interactive Forms
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -10,6 +10,9 @@ document.addEventListener('DOMContentLoaded', () => {
   initGalleryViewer();
   initContactForm();
   initCategoryCards();
+  initFavoritesSystem();
+  initMortgageCalculator();
+  initPropertyDetailActions();
 });
 
 /**
@@ -57,6 +60,7 @@ function initHeroSearch() {
       const type = document.getElementById('heroType')?.value || 'all';
       const minPrice = document.getElementById('heroMinPrice')?.value || '';
       const maxPrice = document.getElementById('heroMaxPrice')?.value || '';
+      const keyword = document.getElementById('heroKeyword')?.value.trim() || '';
 
       // Check if we have the property grid on current page
       const propertyGrid = document.getElementById('propertiesGrid');
@@ -67,12 +71,14 @@ function initHeroSearch() {
         const typeSelect = document.getElementById('filterType');
         const minPriceInput = document.getElementById('filterMinPrice');
         const maxPriceInput = document.getElementById('filterMaxPrice');
+        const searchInput = document.getElementById('filterSearch');
 
         if (purposeSelect) purposeSelect.value = (currentPurpose === 'buy') ? 'sale' : 'rent';
         if (citySelect) citySelect.value = city;
         if (typeSelect) typeSelect.value = type;
         if (minPriceInput) minPriceInput.value = minPrice;
         if (maxPriceInput) maxPriceInput.value = maxPrice;
+        if (searchInput && keyword) searchInput.value = keyword;
 
         // Trigger filter
         applyPropertyFilters();
@@ -90,6 +96,7 @@ function initHeroSearch() {
         if (type && type !== 'all') params.set('type', type);
         if (minPrice) params.set('min_price', minPrice);
         if (maxPrice) params.set('max_price', maxPrice);
+        if (keyword) params.set('search', keyword);
         window.location.href = 'properties.php?' + params.toString();
       }
     });
@@ -120,8 +127,10 @@ function initCategoryCards() {
 }
 
 /**
- * Dynamic Property Filtering Engine
+ * Dynamic Property Filtering & Search & Sorting Engine
  */
+let filterFavoritesOnly = false;
+
 function initPropertyFiltering() {
   const filterElements = [
     'filterPurpose',
@@ -142,6 +151,51 @@ function initPropertyFiltering() {
       }
     }
   });
+
+  // Search input with instant feedback
+  const searchInput = document.getElementById('filterSearch');
+  const clearSearchBtn = document.getElementById('clearSearchBtn');
+
+  if (searchInput) {
+    searchInput.addEventListener('input', () => {
+      if (clearSearchBtn) {
+        clearSearchBtn.style.display = searchInput.value ? 'inline-block' : 'none';
+      }
+      applyPropertyFilters();
+    });
+  }
+
+  if (clearSearchBtn) {
+    clearSearchBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (searchInput) {
+        searchInput.value = '';
+        clearSearchBtn.style.display = 'none';
+        applyPropertyFilters();
+        searchInput.focus();
+      }
+    });
+  }
+
+  // Sort dropdown
+  const sortSelect = document.getElementById('filterSort');
+  if (sortSelect) {
+    sortSelect.addEventListener('change', () => {
+      applyPropertySorting();
+      applyPropertyFilters();
+    });
+  }
+
+  // Favorites filter toggle pill
+  const favToggleBtn = document.getElementById('filterFavoritesBtn');
+  if (favToggleBtn) {
+    favToggleBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      filterFavoritesOnly = !filterFavoritesOnly;
+      favToggleBtn.classList.toggle('active', filterFavoritesOnly);
+      applyPropertyFilters();
+    });
+  }
 
   const clearBtn = document.getElementById('clearFiltersBtn');
   if (clearBtn) {
@@ -175,10 +229,67 @@ function initPropertyFiltering() {
     document.getElementById('filterMaxPrice').value = urlParams.get('max_price');
     hasUrlParams = true;
   }
+  if (urlParams.has('search') && document.getElementById('filterSearch')) {
+    document.getElementById('filterSearch').value = urlParams.get('search');
+    if (clearSearchBtn) clearSearchBtn.style.display = 'inline-block';
+    hasUrlParams = true;
+  }
+  if (urlParams.has('favorites') || urlParams.has('saved')) {
+    filterFavoritesOnly = true;
+    if (favToggleBtn) favToggleBtn.classList.add('active');
+    hasUrlParams = true;
+  }
+  if (urlParams.has('sort') && sortSelect) {
+    sortSelect.value = urlParams.get('sort');
+    applyPropertySorting();
+    hasUrlParams = true;
+  }
 
   if (hasUrlParams) {
     applyPropertyFilters();
   }
+}
+
+function applyPropertySorting() {
+  const grid = document.getElementById('propertiesGrid');
+  if (!grid) return;
+
+  const sortValue = document.getElementById('filterSort')?.value || 'default';
+  const cards = Array.from(grid.querySelectorAll('.property-card'));
+  if (!cards.length) return;
+
+  cards.sort((a, b) => {
+    const priceA = parseFloat(a.getAttribute('data-price')) || 0;
+    const priceB = parseFloat(b.getAttribute('data-price')) || 0;
+    const bedsA = parseInt(a.getAttribute('data-bedrooms')) || 0;
+    const bedsB = parseInt(b.getAttribute('data-bedrooms')) || 0;
+    const areaA = parseFloat(a.getAttribute('data-area')) || 0;
+    const areaB = parseFloat(b.getAttribute('data-area')) || 0;
+    const featuredA = parseInt(a.getAttribute('data-featured')) || 0;
+    const featuredB = parseInt(b.getAttribute('data-featured')) || 0;
+
+    switch (sortValue) {
+      case 'price-asc':
+        return priceA - priceB;
+      case 'price-desc':
+        return priceB - priceA;
+      case 'beds-desc':
+        return bedsB - bedsA;
+      case 'area-desc':
+        return areaB - areaA;
+      case 'default':
+      default:
+        // Featured listings first
+        if (featuredB !== featuredA) {
+          return featuredB - featuredA;
+        }
+        return (a.getAttribute('data-id') || '').localeCompare(b.getAttribute('data-id') || '');
+    }
+  });
+
+  const emptyMsg = document.getElementById('emptyResultsMsg');
+  cards.forEach(card => grid.appendChild(card));
+  if (emptyMsg) grid.appendChild(emptyMsg);
 }
 
 function applyPropertyFilters() {
@@ -192,16 +303,21 @@ function applyPropertyFilters() {
   const minPrice = parseFloat(document.getElementById('filterMinPrice')?.value) || 0;
   const maxPrice = parseFloat(document.getElementById('filterMaxPrice')?.value) || Infinity;
   const availableOnly = document.getElementById('filterAvailableOnly')?.checked || false;
+  const searchQuery = document.getElementById('filterSearch')?.value.trim().toLowerCase() || '';
 
+  const favs = getFavorites();
   let visibleCount = 0;
 
   cards.forEach(card => {
+    const cardId = card.getAttribute('data-id') || '';
     const cardPurpose = card.getAttribute('data-purpose') || '';
     const cardCity = card.getAttribute('data-city') || '';
     const cardType = card.getAttribute('data-category') || '';
     const cardPrice = parseFloat(card.getAttribute('data-price')) || 0;
     const cardBeds = parseInt(card.getAttribute('data-bedrooms')) || 0;
     const cardStatus = (card.getAttribute('data-status') || '').toLowerCase();
+    const cardTitle = card.getAttribute('data-title') || '';
+    const cardLocation = card.getAttribute('data-location') || '';
 
     // Matching conditions
     const matchPurpose = (purpose === 'all' || cardPurpose.toLowerCase() === purpose.toLowerCase());
@@ -224,7 +340,18 @@ function applyPropertyFilters() {
       matchStatus = (cardStatus === 'available');
     }
 
-    if (matchPurpose && matchCity && matchType && matchMin && matchMax && matchBeds && matchStatus) {
+    let matchFav = true;
+    if (filterFavoritesOnly) {
+      matchFav = favs.includes(cardId);
+    }
+
+    let matchSearch = true;
+    if (searchQuery) {
+      const haystack = (cardTitle + ' ' + cardLocation + ' ' + cardCity + ' ' + cardType + ' ' + cardId).toLowerCase();
+      matchSearch = haystack.includes(searchQuery);
+    }
+
+    if (matchPurpose && matchCity && matchType && matchMin && matchMax && matchBeds && matchStatus && matchFav && matchSearch) {
       card.style.display = 'flex';
       visibleCount++;
     } else {
@@ -235,13 +362,30 @@ function applyPropertyFilters() {
   // Update dynamic counter
   const counterEl = document.getElementById('resultsCounter');
   if (counterEl) {
-    counterEl.textContent = `Showing ${visibleCount} of ${cards.length} properties`;
+    if (filterFavoritesOnly) {
+      counterEl.textContent = `Showing ${visibleCount} saved property (${favs.length} total saved)`;
+    } else {
+      counterEl.textContent = `Showing ${visibleCount} of ${cards.length} properties`;
+    }
   }
 
   // Handle empty state message
   const emptyState = document.getElementById('emptyResultsMsg');
   if (emptyState) {
-    emptyState.style.display = (visibleCount === 0) ? 'block' : 'none';
+    if (visibleCount === 0) {
+      emptyState.style.display = 'block';
+      const emptyTitle = emptyState.querySelector('h4');
+      const emptyDesc = emptyState.querySelector('p');
+      if (filterFavoritesOnly && favs.length === 0) {
+        if (emptyTitle) emptyTitle.textContent = 'No saved properties yet';
+        if (emptyDesc) emptyDesc.textContent = 'Click the heart icon on any property card to bookmark it for later review.';
+      } else {
+        if (emptyTitle) emptyTitle.textContent = 'No matching properties found';
+        if (emptyDesc) emptyDesc.textContent = 'Try adjusting your search keywords, filter options, or price constraints.';
+      }
+    } else {
+      emptyState.style.display = 'none';
+    }
   }
 }
 
@@ -253,6 +397,10 @@ function resetFilters() {
   const minPriceInput = document.getElementById('filterMinPrice');
   const maxPriceInput = document.getElementById('filterMaxPrice');
   const availableCheck = document.getElementById('filterAvailableOnly');
+  const searchInput = document.getElementById('filterSearch');
+  const clearSearchBtn = document.getElementById('clearSearchBtn');
+  const sortSelect = document.getElementById('filterSort');
+  const favToggleBtn = document.getElementById('filterFavoritesBtn');
 
   if (purposeSelect) purposeSelect.value = 'all';
   if (citySelect) citySelect.value = 'all';
@@ -261,8 +409,339 @@ function resetFilters() {
   if (minPriceInput) minPriceInput.value = '';
   if (maxPriceInput) maxPriceInput.value = '';
   if (availableCheck) availableCheck.checked = false;
+  if (searchInput) searchInput.value = '';
+  if (clearSearchBtn) clearSearchBtn.style.display = 'none';
+  if (sortSelect) sortSelect.value = 'default';
+  
+  filterFavoritesOnly = false;
+  if (favToggleBtn) favToggleBtn.classList.remove('active');
 
+  applyPropertySorting();
   applyPropertyFilters();
+}
+
+/**
+ * Saved / Favorites Engine (Persistent localStorage)
+ */
+function getFavorites() {
+  try {
+    const raw = localStorage.getItem('apd_favorites');
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function saveFavorites(favs) {
+  try {
+    localStorage.setItem('apd_favorites', JSON.stringify(favs));
+  } catch (e) {
+    // Ignore storage quota errors
+  }
+}
+
+function toggleFavorite(propId) {
+  if (!propId) return false;
+  let favs = getFavorites();
+  const index = favs.indexOf(propId);
+  let isSaved = false;
+
+  if (index === -1) {
+    favs.push(propId);
+    isSaved = true;
+    showToast(`Property ${propId} saved to your favorites!`);
+  } else {
+    favs.splice(index, 1);
+    isSaved = false;
+    showToast(`Property ${propId} removed from favorites.`);
+  }
+
+  saveFavorites(favs);
+  updateFavoriteBadges();
+  syncFavoriteButtons();
+
+  // If we are currently in favorites-only view, re-filter
+  if (filterFavoritesOnly) {
+    applyPropertyFilters();
+  }
+
+  return isSaved;
+}
+
+function updateFavoriteBadges() {
+  const count = getFavorites().length;
+  document.querySelectorAll('.fav-count-badge').forEach(badge => {
+    badge.textContent = count;
+  });
+}
+
+function syncFavoriteButtons() {
+  const favs = getFavorites();
+
+  // Card heart buttons
+  document.querySelectorAll('.btn-fav-card').forEach(btn => {
+    const id = btn.getAttribute('data-prop-id');
+    const active = favs.includes(id);
+    btn.classList.toggle('active', active);
+    btn.setAttribute('title', active ? 'Remove from Favorites' : 'Save to Favorites');
+  });
+
+  // Details page heart button
+  const detailBtn = document.getElementById('btnFavDetail');
+  if (detailBtn) {
+    const id = detailBtn.getAttribute('data-prop-id');
+    const active = favs.includes(id);
+    detailBtn.classList.toggle('active', active);
+    const label = detailBtn.querySelector('.fav-detail-label');
+    if (label) {
+      label.textContent = active ? 'Saved in Favorites' : 'Save to Favorites';
+    }
+  }
+}
+
+function initFavoritesSystem() {
+  updateFavoriteBadges();
+  syncFavoriteButtons();
+
+  // Wire click listener for property cards (delegation)
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('.btn-fav-card');
+    if (btn) {
+      e.preventDefault();
+      e.stopPropagation();
+      const propId = btn.getAttribute('data-prop-id');
+      toggleFavorite(propId);
+    }
+  });
+}
+
+/**
+ * PKR Mortgage & Financing Calculator
+ */
+function initMortgageCalculator() {
+  const calcCard = document.getElementById('mortgageCalculator');
+  if (!calcCard) return;
+
+  const priceInput = document.getElementById('calcPropPrice');
+  const downSlider = document.getElementById('calcDownPct');
+  const tenureSlider = document.getElementById('calcTenure');
+  const rateInput = document.getElementById('calcRate');
+  const downPills = document.querySelectorAll('.calc-pill-pct');
+  const tenurePills = document.querySelectorAll('.calc-pill-tenure');
+  const applyBtn = document.getElementById('btnApplyPlanToInquiry');
+
+  function calculate() {
+    const price = parseFloat(priceInput?.value) || 0;
+    const downPct = parseFloat(downSlider?.value) || 20;
+    const tenureYears = parseInt(tenureSlider?.value) || 15;
+    const annualRate = parseFloat(rateInput?.value) || 15.5;
+
+    const downAmount = price * (downPct / 100);
+    const loanAmount = Math.max(0, price - downAmount);
+    const months = tenureYears * 12;
+    const monthlyRate = (annualRate / 100) / 12;
+
+    let monthlyInstallment = 0;
+    if (loanAmount > 0 && monthlyRate > 0) {
+      monthlyInstallment = (loanAmount * (monthlyRate * Math.pow(1 + monthlyRate, months))) / (Math.pow(1 + monthlyRate, months) - 1);
+    }
+
+    const totalMarkup = (monthlyInstallment * months) - loanAmount;
+    const totalRepayment = downAmount + (monthlyInstallment * months);
+
+    // Update labels
+    const downPctLabel = document.getElementById('calcDownPctLabel');
+    const downAmtLabel = document.getElementById('calcDownAmtLabel');
+    const tenureLabel = document.getElementById('calcTenureLabel');
+    const monthsLabel = document.getElementById('calcMonthsLabel');
+    const rateLabel = document.getElementById('calcRateLabel');
+    const priceFormatted = document.getElementById('calcPriceFormatted');
+
+    if (downPctLabel) downPctLabel.textContent = `${downPct}%`;
+    if (downAmtLabel) downAmtLabel.textContent = formatPKR(downAmount);
+    if (tenureLabel) tenureLabel.textContent = `${tenureYears} Years`;
+    if (monthsLabel) monthsLabel.textContent = `${months} Months`;
+    if (rateLabel) rateLabel.textContent = `${annualRate}% Annual`;
+    if (priceFormatted) priceFormatted.textContent = `Valuation: ${formatPKR(price)}`;
+
+    // Update result cards
+    const monthlyVal = document.getElementById('calcMonthlyVal');
+    const loanVal = document.getElementById('calcLoanVal');
+    const downVal = document.getElementById('calcDownVal');
+    const profitVal = document.getElementById('calcProfitVal');
+    const totalVal = document.getElementById('calcTotalVal');
+
+    if (monthlyVal) monthlyVal.textContent = formatPKR(Math.round(monthlyInstallment)) + ' / Mo';
+    if (loanVal) loanVal.textContent = formatPKR(Math.round(loanAmount));
+    if (downVal) downVal.textContent = formatPKR(Math.round(downAmount));
+    if (profitVal) profitVal.textContent = formatPKR(Math.round(totalMarkup));
+    if (totalVal) totalVal.textContent = formatPKR(Math.round(totalRepayment));
+  }
+
+  if (priceInput) priceInput.addEventListener('input', calculate);
+
+  if (downSlider) {
+    downSlider.addEventListener('input', () => {
+      downPills.forEach(p => p.classList.toggle('active', p.getAttribute('data-pct') === downSlider.value));
+      calculate();
+    });
+  }
+
+  downPills.forEach(pill => {
+    pill.addEventListener('click', () => {
+      downPills.forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+      if (downSlider) {
+        downSlider.value = pill.getAttribute('data-pct');
+        calculate();
+      }
+    });
+  });
+
+  if (tenureSlider) {
+    tenureSlider.addEventListener('input', () => {
+      tenurePills.forEach(p => p.classList.toggle('active', p.getAttribute('data-years') === tenureSlider.value));
+      calculate();
+    });
+  }
+
+  tenurePills.forEach(pill => {
+    pill.addEventListener('click', () => {
+      tenurePills.forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+      if (tenureSlider) {
+        tenureSlider.value = pill.getAttribute('data-years');
+        calculate();
+      }
+    });
+  });
+
+  if (rateInput) rateInput.addEventListener('input', calculate);
+
+  // Apply plan to inquiry form message
+  if (applyBtn) {
+    applyBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const price = parseFloat(priceInput?.value) || 0;
+      const downPct = parseFloat(downSlider?.value) || 20;
+      const tenureYears = parseInt(tenureSlider?.value) || 15;
+      const downAmount = price * (downPct / 100);
+      const loanAmount = Math.max(0, price - downAmount);
+      const months = tenureYears * 12;
+      const annualRate = parseFloat(rateInput?.value) || 15.5;
+      const monthlyRate = (annualRate / 100) / 12;
+      const monthlyInstallment = (loanAmount > 0 && monthlyRate > 0)
+        ? Math.round((loanAmount * (monthlyRate * Math.pow(1 + monthlyRate, months))) / (Math.pow(1 + monthlyRate, months) - 1))
+        : 0;
+
+      const inqMsg = document.getElementById('detailInqMsg');
+      const inqForm = document.getElementById('propertyInquiryForm');
+
+      if (inqMsg) {
+        inqMsg.value = `Assalam-o-Alaikum,\nI am interested in acquiring this property with an installment/financing plan:\n• Property Valuation: ${formatPKR(price)}\n• Down Payment: ${formatPKR(downAmount)} (${downPct}%)\n• Financing Period: ${tenureYears} Years (${months} Months)\n• Estimated Installment: ${formatPKR(monthlyInstallment)} / Month\n\nPlease advise on bank pre-approval and arrange a property visit.`;
+      }
+
+      if (inqForm) {
+        inqForm.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        inqMsg.focus();
+        showToast('Financing plan applied to inquiry form!');
+      }
+    });
+  }
+
+  // Initial calculation run
+  calculate();
+}
+
+/**
+ * Format Currency in Pakistani Rupee (Crore, Lakh, Thousand)
+ */
+function formatPKR(val) {
+  const num = parseFloat(val);
+  if (isNaN(num) || num <= 0) return 'PKR 0';
+
+  if (num >= 10000000) {
+    const crore = num / 10000000;
+    return `PKR ${crore.toFixed(2).replace(/\.00$/, '')} Crore`;
+  } else if (num >= 100000) {
+    const lakh = num / 100000;
+    return `PKR ${lakh.toFixed(2).replace(/\.00$/, '')} Lakh`;
+  } else {
+    return 'PKR ' + num.toLocaleString('en-PK');
+  }
+}
+
+/**
+ * Property Details Header Actions (Favorites, Share, Print)
+ */
+function initPropertyDetailActions() {
+  const favBtn = document.getElementById('btnFavDetail');
+  const shareBtn = document.getElementById('btnShareDetail');
+
+  if (favBtn) {
+    favBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const id = favBtn.getAttribute('data-prop-id');
+      toggleFavorite(id);
+    });
+  }
+
+  if (shareBtn) {
+    shareBtn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      const shareData = {
+        title: document.title,
+        text: 'Check out this prime property listing on Abdullah Property Dealer Pakistan:',
+        url: window.location.href
+      };
+
+      if (navigator.share) {
+        try {
+          await navigator.share(shareData);
+          return;
+        } catch (err) {
+          // If dismissed by user, do nothing
+          if (err.name === 'AbortError') return;
+        }
+      }
+
+      // Clipboard fallback
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(window.location.href).then(() => {
+          showToast('Property listing link copied to clipboard!');
+        }).catch(() => {
+          prompt('Copy property URL:', window.location.href);
+        });
+      } else {
+        prompt('Copy property URL:', window.location.href);
+      }
+    });
+  }
+}
+
+/**
+ * Toast Notification Popup
+ */
+function showToast(message, duration = 3200) {
+  let toast = document.getElementById('apdToast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'apdToast';
+    toast.className = 'apd-toast';
+    document.body.appendChild(toast);
+  }
+
+  toast.textContent = message;
+  toast.classList.add('show');
+
+  if (window.apdToastTimer) {
+    clearTimeout(window.apdToastTimer);
+  }
+
+  window.apdToastTimer = setTimeout(() => {
+    toast.classList.remove('show');
+  }, duration);
 }
 
 /**
@@ -347,7 +826,6 @@ function initContactForm() {
           // Forward directly to WhatsApp
           if (result.whatsapp_url) {
             const waTab = window.open(result.whatsapp_url, '_blank');
-            // If popup is blocked by the browser, fallback to navigating directly
             if (!waTab || waTab.closed || typeof waTab.closed === 'undefined') {
               setTimeout(() => {
                 window.location.href = result.whatsapp_url;
@@ -379,4 +857,3 @@ function createAlertContainer(form) {
   form.prepend(div);
   return div;
 }
-

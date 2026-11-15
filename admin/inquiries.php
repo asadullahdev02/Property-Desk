@@ -9,6 +9,30 @@ $admin_page = 'inquiries';
 $admin_title = 'Customer Inquiries';
 $admin_subtitle = 'Review and respond to client leads, site visit requests, and property queries.';
 
+// Handle CSV Export
+if (isset($_GET['export']) && $_GET['export'] === 'csv') {
+    $inquiries = get_inquiries();
+    header('Content-Type: text/csv; charset=utf-8');
+    header('Content-Disposition: attachment; filename=apd_inquiries_' . date('Ymd_His') . '.csv');
+    $output = fopen('php://output', 'w');
+    fputcsv($output, ['Inquiry ID', 'Customer Name', 'Phone', 'Address', 'Property ID', 'Property Title', 'Customer Message', 'Status', 'Date Received']);
+    foreach ($inquiries as $inq) {
+        fputcsv($output, [
+            $inq['id'] ?? '',
+            $inq['name'] ?? '',
+            $inq['phone'] ?? '',
+            $inq['address'] ?? '',
+            $inq['property_id'] ?? '',
+            $inq['property_title'] ?? '',
+            $inq['message'] ?? '',
+            $inq['status'] ?? '',
+            $inq['created_at'] ?? ''
+        ]);
+    }
+    fclose($output);
+    exit;
+}
+
 // Handle Status Updates
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'update_inquiry_status') {
     $inq_id = trim($_POST['inquiry_id'] ?? '');
@@ -40,8 +64,15 @@ include __DIR__ . '/admin-header.php';
 ?>
 
 <div class="admin-card">
-  <div class="admin-card-header">
-    <h3>Customer Inquiries Log (<?php echo count($inquiries); ?> Total Records)</h3>
+  <div class="admin-card-header" style="flex-wrap:wrap;gap:12px;">
+    <div>
+      <h3>Customer Inquiries Log (<?php echo count($inquiries); ?> Total Records)</h3>
+      <span style="font-size:0.8rem;color:var(--adm-grey);">Real estate client leads and WhatsApp inquiries</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      <input type="text" id="adminInqSearch" placeholder="Filter by name, phone, property..." class="filter-select" style="padding:6px 12px;font-size:0.85rem;border-radius:4px;min-width:220px;">
+      <a href="inquiries.php?export=csv" class="btn btn-outline btn-sm">Export Leads CSV</a>
+    </div>
   </div>
 
   <div class="table-responsive">
@@ -62,7 +93,7 @@ include __DIR__ . '/admin-header.php';
           <tr><td colspan="7" style="text-align:center;padding:30px;color:var(--adm-grey);">No inquiries found.</td></tr>
         <?php else: ?>
           <?php foreach ($inquiries as $inq): ?>
-            <tr>
+            <tr class="admin-inq-row" data-search="<?php echo htmlspecialchars(strtolower($inq['id'] . ' ' . $inq['name'] . ' ' . $inq['phone'] . ' ' . $inq['address'] . ' ' . ($inq['property_title'] ?? '') . ' ' . ($inq['status'] ?? ''))); ?>">
               <td>
                 <code><?php echo htmlspecialchars($inq['id']); ?></code><br>
                 <span style="font-size:0.75rem;color:var(--adm-grey);"><?php echo htmlspecialchars($inq['created_at']); ?></span>

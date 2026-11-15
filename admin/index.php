@@ -46,6 +46,21 @@ include __DIR__ . '/admin-header.php';
   </div>
 </div>
 
+<!-- Portfolio Valuation & Active Inventory Strip -->
+<div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); margin-bottom: 25px;">
+  <div class="stat-card" style="border-left: 4px solid var(--adm-burgundy);">
+    <div class="label">Total Portfolio Valuation</div>
+    <div class="value" style="font-size: 1.5rem;"><?php echo format_pkr($stats['portfolio_value'] ?? 0); ?></div>
+    <div class="sub">Aggregate property value under management</div>
+  </div>
+
+  <div class="stat-card terracotta" style="border-left: 4px solid var(--adm-terracotta);">
+    <div class="label">Active Market Inventory</div>
+    <div class="value" style="font-size: 1.5rem;"><?php echo format_pkr($stats['available_value'] ?? 0); ?></div>
+    <div class="sub">Valuation of currently available listings</div>
+  </div>
+</div>
+
 <!-- Secondary Stats Strip (Inquiries) -->
 <div style="background:var(--adm-white);border:1px solid var(--adm-border);border-radius:8px;padding:18px 24px;margin-bottom:30px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:15px;">
   <div>
@@ -53,7 +68,10 @@ include __DIR__ . '/admin-header.php';
     <span style="font-family:'Cinzel',serif;font-size:1.4rem;font-weight:700;color:var(--adm-burgundy);margin-left:8px;"><?php echo $stats['total_inquiries']; ?> Inquiries</span>
     <span style="font-size:0.85rem;color:var(--adm-grey);margin-left:12px;">(<?php echo $stats['new_inquiries']; ?> awaiting agent follow-up)</span>
   </div>
-  <a href="inquiries.php" class="btn btn-terracotta btn-sm">View All Inquiries</a>
+  <div style="display:flex;gap:10px;">
+    <a href="inquiries.php?export=csv" class="btn btn-outline btn-sm">Export Leads CSV</a>
+    <a href="inquiries.php" class="btn btn-terracotta btn-sm">View All Inquiries</a>
+  </div>
 </div>
 
 <!-- Recent Properties Table -->

@@ -5,6 +5,7 @@
 document.addEventListener('DOMContentLoaded', () => {
   initImagePreview();
   initDeleteConfirmations();
+  initAdminSearch();
 });
 
 function initImagePreview() {
@@ -53,5 +54,31 @@ function initDeleteConfirmations() {
       }
     });
   });
+}
+
+function initAdminSearch() {
+  const propSearch = document.getElementById('adminPropSearch');
+  if (propSearch) {
+    propSearch.addEventListener('input', function() {
+      const q = this.value.trim().toLowerCase();
+      const rows = document.querySelectorAll('.admin-prop-row');
+      rows.forEach(row => {
+        const text = row.getAttribute('data-search') || '';
+        row.style.display = (text.indexOf(q) !== -1) ? '' : 'none';
+      });
+    });
+  }
+
+  const inqSearch = document.getElementById('adminInqSearch');
+  if (inqSearch) {
+    inqSearch.addEventListener('input', function() {
+      const q = this.value.trim().toLowerCase();
+      const rows = document.querySelectorAll('.admin-inq-row');
+      rows.forEach(row => {
+        const text = row.getAttribute('data-search') || '';
+        row.style.display = (text.indexOf(q) !== -1) ? '' : 'none';
+      });
+    });
+  }
 }
 

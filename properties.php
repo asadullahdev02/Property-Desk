@@ -65,6 +65,32 @@ include __DIR__ . '/includes/header.php';
     
     <!-- Working JavaScript Filter Toolbar -->
     <div class="filter-toolbar">
+      <!-- Search & Sort Row -->
+      <div class="filter-search-row">
+        <div class="filter-search-wrap">
+          <svg class="search-svg-icon" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+          <input type="text" id="filterSearch" class="filter-search-input" placeholder="Search by location, keyword, DHA, Bahria, Gulberg, ID...">
+          <button type="button" id="clearSearchBtn" class="clear-search-btn" title="Clear text" style="display:none;">&times;</button>
+        </div>
+
+        <div class="filter-quick-actions">
+          <!-- Sort Dropdown -->
+          <select id="filterSort" class="filter-select" aria-label="Sort Properties">
+            <option value="default">Sort: Recommended</option>
+            <option value="price-asc">Price: Low to High</option>
+            <option value="price-desc">Price: High to Low</option>
+            <option value="beds-desc">Bedrooms: Most First</option>
+            <option value="area-desc">Size: Largest First</option>
+          </select>
+
+          <!-- Favorites Filter Toggle -->
+          <button type="button" id="filterFavoritesBtn" class="filter-pill-btn" title="Toggle Saved Properties">
+            <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+            <span>Saved (<span class="fav-count-badge">0</span>)</span>
+          </button>
+        </div>
+      </div>
+
       <div class="filter-row">
         <div class="filter-left">
           <!-- Purpose Filter -->
@@ -136,11 +162,19 @@ include __DIR__ . '/includes/header.php';
                  data-category="<?php echo htmlspecialchars($prop['category']); ?>"
                  data-price="<?php echo (float)$prop['price']; ?>"
                  data-bedrooms="<?php echo (int)$prop['bedrooms']; ?>"
+                 data-area="<?php echo (float)($prop['area_value'] ?? 0); ?>"
+                 data-featured="<?php echo !empty($prop['featured']) ? '1' : '0'; ?>"
+                 data-title="<?php echo htmlspecialchars(strtolower($prop['title'])); ?>"
+                 data-location="<?php echo htmlspecialchars(strtolower($prop['location'])); ?>"
                  data-status="<?php echo htmlspecialchars($prop['status']); ?>">
           
           <!-- Thumbnail & Badges -->
           <div class="property-thumb-wrap">
             <img src="<?php echo htmlspecialchars($prop['image']); ?>" alt="<?php echo htmlspecialchars($prop['title']); ?>" loading="lazy">
+            
+            <button type="button" class="btn-fav-card" data-prop-id="<?php echo htmlspecialchars($prop['id']); ?>" aria-label="Save to Favorites" title="Save to Favorites">
+              <svg class="heart-icon" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+            </button>
             
             <div class="prop-badge-group">
               <span class="badge-purpose <?php echo strtolower($prop['purpose']); ?>">

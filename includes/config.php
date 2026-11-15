@@ -272,13 +272,19 @@ function get_dashboard_stats() {
         'rented' => 0,
         'under_offer' => 0,
         'total_inquiries' => count($inquiries),
-        'new_inquiries' => 0
+        'new_inquiries' => 0,
+        'portfolio_value' => 0,
+        'available_value' => 0
     ];
 
     foreach ($properties as $prop) {
+        $price = (float)($prop['price'] ?? 0);
         $status = strtolower($prop['status'] ?? 'available');
+        $stats['portfolio_value'] += $price;
+
         if ($status === 'available') {
             $stats['available']++;
+            $stats['available_value'] += $price;
         } elseif ($status === 'sold') {
             $stats['sold']++;
         } elseif ($status === 'rented') {

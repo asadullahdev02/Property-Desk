@@ -52,6 +52,10 @@ $page_desc = $page_desc ?? 'Discover premium houses, apartments, plots and comme
         </div>
       </div>
       <div class="topbar-links">
+        <a href="properties.php?favorites=1" class="topbar-fav-link" id="topbarFavLink" title="View Saved Properties Shortlist">
+          <svg style="width:14px;height:14px;fill:currentColor;" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+          <span>Saved (<span class="fav-count-badge">0</span>)</span>
+        </a>
         <a href="admin/login.php" class="admin-link-btn" title="Admin Control Panel">
           Admin Portal
         </a>
@@ -77,6 +81,9 @@ $page_desc = $page_desc ?? 'Discover premium houses, apartments, plots and comme
         <a href="properties.php?purpose=sale" class="nav-link <?php echo ($current_page === 'buy') ? 'active' : ''; ?>">Buy Property</a>
         <a href="properties.php?purpose=rent" class="nav-link <?php echo ($current_page === 'rent') ? 'active' : ''; ?>">Rent Property</a>
         <a href="properties.php?type=Commercial+Properties" class="nav-link <?php echo ($current_page === 'commercial') ? 'active' : ''; ?>">Commercial</a>
+        <a href="properties.php?favorites=1" class="nav-link nav-link-fav" title="Saved Properties Shortlist">
+          <svg style="width:14px;height:14px;fill:currentColor;vertical-align:-2px;margin-right:4px;" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>Saved (<span class="fav-count-badge">0</span>)
+        </a>
         <a href="index.php#aboutSection" class="nav-link <?php echo ($current_page === 'about') ? 'active' : ''; ?>">About Us</a>
         <a href="index.php#contactSection" class="nav-link <?php echo ($current_page === 'contact') ? 'active' : ''; ?>">Contact</a>
       </nav>

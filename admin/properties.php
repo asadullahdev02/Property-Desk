@@ -9,6 +9,34 @@ $admin_page = 'properties';
 $admin_title = 'Manage Properties';
 $admin_subtitle = 'Add, edit, remove, and change statuses for properties across Pakistan.';
 
+// Handle CSV Export
+if (isset($_GET['export']) && $_GET['export'] === 'csv') {
+    $properties = get_properties();
+    header('Content-Type: text/csv; charset=utf-8');
+    header('Content-Disposition: attachment; filename=apd_properties_' . date('Ymd_His') . '.csv');
+    $output = fopen('php://output', 'w');
+    fputcsv($output, ['ID', 'Title', 'City', 'Location', 'Category', 'Purpose', 'Price (PKR)', 'Price Display', 'Area', 'Bedrooms', 'Bathrooms', 'Status', 'Created At']);
+    foreach ($properties as $p) {
+        fputcsv($output, [
+            $p['id'] ?? '',
+            $p['title'] ?? '',
+            $p['city'] ?? '',
+            $p['location'] ?? '',
+            $p['category'] ?? '',
+            $p['purpose'] ?? '',
+            $p['price'] ?? 0,
+            $p['price_display'] ?? format_pkr($p['price'] ?? 0, $p['purpose'] ?? 'sale'),
+            ($p['area_value'] ?? '') . ' ' . ($p['area_unit'] ?? ''),
+            $p['bedrooms'] ?? 0,
+            $p['bathrooms'] ?? 0,
+            $p['status'] ?? '',
+            $p['created_at'] ?? ''
+        ]);
+    }
+    fclose($output);
+    exit;
+}
+
 // Handle Quick Status Change via POST
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'update_status') {
     $prop_id = trim($_POST['property_id'] ?? '');
@@ -42,9 +70,16 @@ include __DIR__ . '/admin-header.php';
 ?>
 
 <div class="admin-card">
-  <div class="admin-card-header">
-    <h3>All Properties (<?php echo count($properties); ?> Total Listings)</h3>
-    <a href="property-form.php" class="btn btn-burgundy btn-sm">+ Add New Property</a>
+  <div class="admin-card-header" style="flex-wrap:wrap;gap:12px;">
+    <div>
+      <h3>All Properties (<?php echo count($properties); ?> Total Listings)</h3>
+      <span style="font-size:0.8rem;color:var(--adm-grey);">Real estate inventory across Pakistan</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      <input type="text" id="adminPropSearch" placeholder="Filter by ID, title, city..." class="filter-select" style="padding:6px 12px;font-size:0.85rem;border-radius:4px;min-width:220px;">
+      <a href="properties.php?export=csv" class="btn btn-outline btn-sm">Export CSV</a>
+      <a href="property-form.php" class="btn btn-burgundy btn-sm">+ Add New Property</a>
+    </div>
   </div>
   
   <div class="table-responsive">
@@ -67,7 +102,7 @@ include __DIR__ . '/admin-header.php';
           <tr><td colspan="9" style="text-align:center;padding:30px;color:var(--adm-grey);">No properties available. Click "Add New Property" to create one.</td></tr>
         <?php else: ?>
           <?php foreach ($properties as $prop): ?>
-            <tr>
+            <tr class="admin-prop-row" data-search="<?php echo htmlspecialchars(strtolower($prop['id'] . ' ' . $prop['title'] . ' ' . $prop['city'] . ' ' . $prop['location'] . ' ' . $prop['category'] . ' ' . $prop['status'])); ?>">
               <td>
                 <img src="../<?php echo htmlspecialchars($prop['image']); ?>" alt="Thumb" class="table-thumb">
               </td>

@@ -79,6 +79,22 @@ include __DIR__ . '/includes/header.php';
         <div class="detail-price-unit">
           Price in Pakistani Rupees (PKR)
         </div>
+        
+        <!-- Action Buttons -->
+        <div class="detail-actions-bar">
+          <button type="button" class="btn-detail-action btn-fav-detail" id="btnFavDetail" data-prop-id="<?php echo htmlspecialchars($property['id']); ?>" title="Save to Favorites">
+            <svg class="heart-icon" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+            <span class="fav-detail-label">Save to Favorites</span>
+          </button>
+          <button type="button" class="btn-detail-action" id="btnShareDetail" title="Copy Property Link">
+            <svg viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92c0-1.61-1.31-2.92-2.92-2.92z"/></svg>
+            <span>Share</span>
+          </button>
+          <button type="button" class="btn-detail-action" onclick="window.print()" title="Print Specification Sheet">
+            <svg viewBox="0 0 24 24"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg>
+            <span>Print Sheet</span>
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -176,6 +192,108 @@ include __DIR__ . '/includes/header.php';
           </div>
           <div style="padding:8px 0;border-bottom:1px solid var(--c-grey-border);">
             <strong style="color:var(--c-grey-medium);">Current Status:</strong> <?php echo htmlspecialchars($property['status']); ?>
+          </div>
+        </div>
+      </div>
+
+      <!-- PKR Real Estate Mortgage & Installment Financing Calculator -->
+      <div class="detail-section-card mortgage-calc-card" id="mortgageCalculator">
+        <div class="calc-header-wrap">
+          <div class="calc-icon-badge">
+            <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+          </div>
+          <div>
+            <h3>PKR Financing & Installment Calculator</h3>
+            <p class="calc-subtext">Estimate monthly installment options based on prevailing Pakistani bank KIBOR & Islamic financing rates.</p>
+          </div>
+        </div>
+
+        <div class="calc-grid-layout">
+          <!-- Input Controls -->
+          <div class="calc-controls">
+            <div class="calc-input-group">
+              <label for="calcPropPrice" class="calc-label">Property Price (PKR)</label>
+              <div class="calc-input-with-affix">
+                <span class="affix">PKR</span>
+                <input type="number" id="calcPropPrice" class="calc-field-control" value="<?php echo (float)$property['price']; ?>" min="500000" step="100000">
+              </div>
+              <div class="calc-price-word" id="calcPriceFormatted"></div>
+            </div>
+
+            <div class="calc-input-group">
+              <div class="calc-label-row">
+                <label for="calcDownPct" class="calc-label">Down Payment: <strong id="calcDownPctLabel" class="calc-dyn-val">20%</strong></label>
+                <span class="calc-badge-amt" id="calcDownAmtLabel">PKR 0</span>
+              </div>
+              <input type="range" id="calcDownPct" min="10" max="60" step="5" value="20" class="calc-slider-bar">
+              <div class="calc-pills-row">
+                <button type="button" class="calc-pill-pct" data-pct="15">15%</button>
+                <button type="button" class="calc-pill-pct active" data-pct="20">20%</button>
+                <button type="button" class="calc-pill-pct" data-pct="25">25%</button>
+                <button type="button" class="calc-pill-pct" data-pct="30">30%</button>
+                <button type="button" class="calc-pill-pct" data-pct="50">50%</button>
+              </div>
+            </div>
+
+            <div class="calc-input-group">
+              <div class="calc-label-row">
+                <label for="calcTenure" class="calc-label">Financing Period: <strong id="calcTenureLabel" class="calc-dyn-val">15 Years</strong></label>
+                <span class="calc-badge-amt" id="calcMonthsLabel">180 Months</span>
+              </div>
+              <input type="range" id="calcTenure" min="1" max="25" step="1" value="15" class="calc-slider-bar">
+              <div class="calc-pills-row">
+                <button type="button" class="calc-pill-tenure" data-years="5">5 Yrs</button>
+                <button type="button" class="calc-pill-tenure" data-years="10">10 Yrs</button>
+                <button type="button" class="calc-pill-tenure active" data-years="15">15 Yrs</button>
+                <button type="button" class="calc-pill-tenure" data-years="20">20 Yrs</button>
+                <button type="button" class="calc-pill-tenure" data-years="25">25 Yrs</button>
+              </div>
+            </div>
+
+            <div class="calc-input-group">
+              <div class="calc-label-row">
+                <label for="calcRate" class="calc-label">Estimated Bank Profit Rate (KIBOR + Margin)</label>
+                <span class="calc-badge-amt" id="calcRateLabel">15.5% Annual</span>
+              </div>
+              <div class="calc-input-with-affix">
+                <input type="number" id="calcRate" class="calc-field-control" value="15.5" min="5" max="30" step="0.25">
+                <span class="affix suffix">%</span>
+              </div>
+              <small class="calc-note">Indicative rate for HBL, Meezan, Bank Alfalah, and Standard Chartered Home Loans.</small>
+            </div>
+          </div>
+
+          <!-- Calculation Outputs Summary -->
+          <div class="calc-summary-box">
+            <div class="calc-monthly-card">
+              <span class="monthly-tag">Estimated Monthly Installment</span>
+              <div class="monthly-number" id="calcMonthlyVal">PKR 0</div>
+              <span class="monthly-sub">Principal repayment + bank markup</span>
+            </div>
+
+            <div class="calc-specs-breakdown">
+              <div class="calc-spec-line">
+                <span>Financed Loan Amount:</span>
+                <strong id="calcLoanVal">PKR 0</strong>
+              </div>
+              <div class="calc-spec-line">
+                <span>Initial Down Payment:</span>
+                <strong id="calcDownVal">PKR 0</strong>
+              </div>
+              <div class="calc-spec-line">
+                <span>Total Markup / Profit:</span>
+                <strong id="calcProfitVal">PKR 0</strong>
+              </div>
+              <div class="calc-spec-line total-line">
+                <span>Total Financing Repayment:</span>
+                <strong id="calcTotalVal">PKR 0</strong>
+              </div>
+            </div>
+
+            <button type="button" id="btnApplyPlanToInquiry" class="btn btn-burgundy btn-block" style="display:flex;align-items:center;justify-content:center;gap:8px;">
+              <svg style="width:16px;height:16px;fill:currentColor" viewBox="0 0 24 24"><path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>
+              <span>Apply Plan to Inquiry Form</span>
+            </button>
           </div>
         </div>
       </div>
