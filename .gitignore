@@ -1,0 +1,19 @@
+# Archives & Backups
+*.zip
+*.rar
+*.tar.gz
+*.bak
+*.sql
+
+# System & OS
+.DS_Store
+Thumbs.db
+ehthumbs.db
+
+# IDE & Editors
+.vscode/
+.idea/
+
+# Environment
+.env
+config.local.php
